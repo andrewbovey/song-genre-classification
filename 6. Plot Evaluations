@@ -1,0 +1,65 @@
+##### ROC #####
+
+library(pROC)
+
+##### Create DFs for ROC curve plots #####
+preds <- predict(songs.rf, newdata = test, type = "prob")
+test2 <- data.frame(Country = as.numeric(test[,1] == "Country"), Electronic = as.numeric(test[,1] == "Electronic"), Folk = as.numeric(test[,1] == "Folk"), Hip.Hop = as.numeric(test[,1] == "Hip-Hop"), Indie = as.numeric(test[,1] == "Indie"), Jazz = as.numeric(test[,1] == "Jazz"), Metal = as.numeric(test[,1] == "Metal"), Pop = as.numeric(test[,1] == "Pop"), R.B = as.numeric(test[,1] == "R&B"), Rock = as.numeric(test[,1] == "Rock"))
+
+##### Plot ROC curves #####
+plot.roc(roc(test2[,1],preds[,1]), col = '#F8766D', xlim=c(1,-0.3), xlab = 'FPR',ylab = 'TPR')
+plot.roc(roc(test2[,2],preds[,2]), add= T, col = '#D89000')
+plot.roc(roc(test2[,3],preds[,3]), add= T, col = '#A3A500')
+plot.roc(roc(test2[,4],preds[,4]), add= T, col = '#39B600')
+plot.roc(roc(test2[,5],preds[,5]), add= T, col = '#00BF7D')
+plot.roc(roc(test2[,6],preds[,6]), add= T, col = '#00BFC4')
+plot.roc(roc(test2[,7],preds[,7]), add= T, col = '#00B0F6')
+plot.roc(roc(test2[,8],preds[,8]), add= T, col = '#9590FF' )
+plot.roc(roc(test2[,9],preds[,9]), add= T, col = '#E76BF3')
+plot.roc(roc(test2[,10],preds[,10]), add= T, col = '#FF62BC')
+legend(x = 0 , y = 0.6, legend=names(test2), col = c('#F8766D','#D89000','#A3A500','#39B600','#00BF7D','#00BFC4','#00B0F6','#9590FF','#E76BF3','#FF62BC'),lty=1, cex=0.8)
+
+
+##### Confusion Matrix #####
+
+library(caret)
+library(kknn)
+library(RColorBrewer)
+library(cowplot)
+
+##### Create DFs for Confusion Matrix #####
+preds2 <- predict(songs.rf, newdata = test)
+
+tb <- table(preds2,test[,1])
+prop.table(tb,1) # cell percentages
+
+confusionDF <- data.frame(prop.table(tb,1))
+
+# Color Selection
+jGreensFun <- colorRampPalette(brewer.pal(n = 9, "Greens"))
+paletteSize <- 32
+jGreensPalette <- jGreensFun(paletteSize)
+
+##### Plot Confusion Matrix #####
+ggplot(
+  confusionDF, aes(x = preds2, y = Var2, fill = Freq)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  geom_tile() +
+  labs(x = "Predicted Genre", y = "Actual Genre") +
+  scale_fill_gradient2(
+    low = jGreensPalette[1],
+    mid = jGreensPalette[paletteSize/2],
+    high = jGreensPalette[paletteSize],
+    midpoint = (max(confusionDF$Freq) + min(confusionDF$Freq)) / 2,
+    name = "") +
+  theme(legend.key.height = unit(2, "cm"))
+
+
+
+
+
+
+
+
+
+
